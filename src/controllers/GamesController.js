@@ -6,8 +6,6 @@ module.exports = class GamesController {
   static async getAllGames(req, res) {
     const games = await Games.findAll({ raw: true });
 
-    //console.log(games);
-
     res.status(200).send({ message: games });
   }
 
@@ -16,14 +14,19 @@ module.exports = class GamesController {
 
     const gameId = await Games.findOne({ raw: true, where: { id: id } });
 
+    if (!gameId) {
+      res.status(422).send({ message: "Jogo não encontrado!" });
+      return;
+    }
+
     res.status(200).send({ message: gameId });
   }
 
-  static async getGameByTitle(req, res) {
+  static async getGameBySearch(req, res) {
     const title = req.query.title;
     const category = req.query.category;
 
-    const gameByTitle = await Games.findAll({
+    const gameBySearch = await Games.findAll({
       where: {
         [Op.or]: [
           title
@@ -44,6 +47,19 @@ module.exports = class GamesController {
       },
     });
 
-    res.status(200).send({ message: gameByTitle });
+    res.status(200).send({ message: gameBySearch });
+  }
+
+  static async createGame(req, res) {
+    const { title, description, consoles, category, price } = req.body;
+
+    const gametitle = await Games.findOne({ where: { title: title } });
+
+    if (!gametitle) {
+      await Games.create({ title, description, consoles, category, price });
+      res.status(201).send({ message: "Novo jogo cadastrado!" });
+      return;
+    }
+    res.status(400).send({ message: "Jogo já está em cadastrado!" });
   }
 };

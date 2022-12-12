@@ -30,4 +30,11 @@ const Games = db.define("Games", {
   },
 });
 
+Games.associate = function (models) {
+  Games.hasMany(models.Games, {
+    foreignKey: "idGame",
+    as: "user",
+  });
+};
+
 module.exports = Games;
